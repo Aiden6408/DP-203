@@ -1,0 +1,19 @@
+{
+	"name": "SourceDataset_961",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "eventhubinput",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "eventhubcenter/dbhub6408/0/2022",
+				"fileSystem": "capture"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

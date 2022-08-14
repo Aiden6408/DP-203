@@ -1,0 +1,95 @@
+{
+	"name": "AcessLogDataFlow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AccessLogData",
+						"type": "DatasetReference"
+					},
+					"name": "AcesslogStream"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AccessLogs",
+						"type": "DatasetReference"
+					},
+					"name": "ServerLogstoSynapse"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Selectcolumns"
+				},
+				{
+					"name": "ChangeColumns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {_col0_} as string,",
+				"          {_col1_} as string,",
+				"          {_col2_} as string,",
+				"          {_col3_} as string,",
+				"          {_col4_} as string,",
+				"          {_col5_} as string,",
+				"          {_col6_} as short,",
+				"          {_col7_} as short,",
+				"          {_col8_} as string,",
+				"          {_col9_} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> AcesslogStream",
+				"AcesslogStream select(mapColumn(",
+				"          remote_addr = {_col0_},",
+				"          time_local = {_col3_},",
+				"          request = {_col5_},",
+				"          status = {_col6_},",
+				"          bytes = {_col7_},",
+				"          remote_user = {_col8_},",
+				"          http_user_agent = {_col9_}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Selectcolumns",
+				"Selectcolumns derive(time_local = substring(time_local,2,20),",
+				"          status = toInteger(status),",
+				"          bytes = toInteger(bytes)) ~> ChangeColumns",
+				"ChangeColumns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          remote_addr as string,",
+				"          time_local as string,",
+				"          request as string,",
+				"          status as integer,",
+				"          bytes as integer,",
+				"          remote_user as string,",
+				"          http_user_agent as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          remote_addr,",
+				"          time_local,",
+				"          request,",
+				"          status,",
+				"          bytes,",
+				"          remote_user,",
+				"          http_user_agent",
+				"     )) ~> ServerLogstoSynapse"
+			]
+		}
+	}
+}
